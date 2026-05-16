@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="animate-fade-in max-w-4xl">
+    <header class="mb-8">
+        <h2 class="text-3xl font-bold">Settings</h2>
+        <p class="text-slate-500 dark:text-slate-400 mt-1">Configure your AI preferences and connected accounts.</p>
+    </header>
+
+    <div class="space-y-6">
+        <!-- LinkedIn Connection -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
+            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <i class="fa-brands fa-linkedin text-[#0a66c2]"></i> LinkedIn Account
+            </h3>
+            <div id="linkedinConnection" class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-6 mb-6">
+                <div>
+                    <p id="linkedinStatus" class="font-semibold">Not Connected</p>
+                    <p id="linkedinEmail" class="text-sm text-slate-500">Connect to publish directly to your profile.</p>
+                </div>
+                <button id="linkedinConnectBtn"
+                    class="px-4 py-2 bg-[#0a66c2] text-white font-medium rounded-lg hover:bg-[#004182] transition-colors">
+                    Connect Account
+                </button>
+            </div>
+
+            <!-- Company Pages Section -->
+            <div id="companyPagesContainer" class="hidden">
+                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Connect Company Pages</h4>
+                <div id="organizationsList" class="space-y-3">
+                    <!-- Orgs populated by JS -->
+                    <p class="text-sm text-slate-500 italic">Fetching your company pages...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Preferences -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
+            <h3 class="text-lg font-bold mb-4">Default Preferences</h3>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Default Tone</label>
+                        <select
+                            class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none">
+                            <option>Professional</option>
+                            <option>Storytelling</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Approval Workflow</label>
+                        <select
+                            class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none">
+                            <option>Require Approval</option>
+                            <option>Auto-Publish</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadLinkedInStatus() {
+    try {
+        const user = await API.request('/auth/me', { method: 'GET' });
+        const statusEl = document.getElementById('linkedinStatus');
+        const emailEl = document.getElementById('linkedinEmail');
+        const btn = document.getElementById('linkedinConnectBtn');
+        
+        if (user && user.active_account) {
+            const acc = user.active_account;
+            statusEl.textContent = acc.name || 'Connected';
+            emailEl.textContent = user.email || 'LinkedIn account connected';
+            btn.textContent = 'Disconnect';
+            btn.classList.remove('bg-[#0a66c2]', 'hover:bg-[#004182]');
+            btn.classList.add('bg-slate-500', 'hover:bg-slate-600');
+            btn.onclick = async () => {
+                if (confirm('Disconnect your LinkedIn account?')) {
+                    await API.request('/auth/logout', { method: 'POST' });
+                    window.location.reload();
+                }
+            };
+            
+            // Always try to load organizations if it's a person account
+            // (Companies don't have company pages themselves in this flow)
+            if (!acc.linkedin_id || !acc.linkedin_id.includes(':organization:')) {
+                loadOrganizations();
+            }
+        } else {
+            btn.onclick = async () => {
+                const data = await API.request('/auth/linkedin', { method: 'GET' });
+                if (data.auth_url) {
+                    window.location.href = data.auth_url;
+                }
+            };
+        }
+    } catch (error) {
+        console.error('Failed to load LinkedIn status:', error);
+    }
+}
+
+async function loadOrganizations() {
+    const container = document.getElementById('companyPagesContainer');
+    const list = document.getElementById('organizationsList');
+    if (!container || !list) return;
+
+    container.classList.remove('hidden');
+
+    try {
+        const data = await API.request('/auth/organizations', { method: 'GET' });
+
+        // Backend returns this when LinkedIn app lacks r_organization_admin scope.
+        // Show manual connection silently — no red error, no toast.
+        if (data && data.organizations_unavailable) {
+            list.innerHTML = manualConnectionUI();
+            return;
+        }
+
+        const orgs = Array.isArray(data) ? data : [];
+
+        if (orgs.length === 0) {
+            list.innerHTML = manualConnectionUI();
+            return;
+        }
+
+        list.innerHTML = orgs.map(org => `
+            <div class="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-primary">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold">${org.name}</p>
+                        <p class="text-[10px] text-slate-500">${org.vanityName || 'Company Page'}</p>
+                    </div>
+                </div>
+                <button onclick="linkOrg('${org.id}', '${org.name.replace(/'/g, "\\'")}')"
+                    class="px-3 py-1.5 text-xs font-bold text-primary hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
+                    Connect Page
+                </button>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        // Any unexpected error — show manual connection silently
+        list.innerHTML = manualConnectionUI();
+    }
+}
+
+function manualConnectionUI() {
+    return `
+        <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+            <p class="text-xs font-semibold mb-2 uppercase text-slate-400">Manual Connection</p>
+            <p class="text-[10px] text-slate-500 mb-3">Enter your Company Page's numeric ID below. You can find this in your Page's URL on LinkedIn.</p>
+            <div class="flex gap-2">
+                <input type="text" id="manualOrgId" placeholder="e.g. 12345678"
+                    class="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-primary">
+                <button onclick="linkManualOrg()"
+                    class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-all">
+                    Link Page
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+async function linkManualOrg() {
+    const input = document.getElementById('manualOrgId');
+    const id = input.value.trim();
+    if (!id) return;
+    
+    // Format as URN if only numeric ID provided
+    const fullId = id.startsWith('urn:li:organization:') ? id : `urn:li:organization:${id}`;
+    
+    await linkOrg(fullId, 'Company Page');
+}
+
+async function linkOrg(id, name) {
+    try {
+        await API.request('/auth/organizations/link', {
+            method: 'POST',
+            body: JSON.stringify({ id, name })
+        });
+        showToast(`Connected to ${name}`, 'success');
+        window.location.reload();
+    } catch (error) {
+        showToast('Failed to connect page', 'error');
+    }
+}
+
+loadLinkedInStatus();
+</script>
+{% endblock %}

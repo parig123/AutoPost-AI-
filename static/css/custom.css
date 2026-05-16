@@ -1,0 +1,237 @@
+/* Custom styles complementing Tailwind */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 20px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.hover-scale {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-scale:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* Toast Animation */
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.toast-enter {
+    animation: slideInRight 0.3s ease-out forwards;
+}
+
+/* Nav Link Animation */
+.nav-link {
+    position: relative;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+    color: #64748b; /* slate-500 */
+    transition: color 0.2s ease;
+    padding-bottom: 4px;
+}
+
+.dark .nav-link {
+    color: #94a3b8; /* slate-400 */
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #0a66c2; /* primary */
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #0a66c2;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0s;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+    transition: transform 0.3s ease-out;
+}
+
+/* Calendar Heatmap & Density */
+.fc-daygrid-day {
+    transition: background-color 0.3s ease;
+}
+
+/* Side Panels */
+aside {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(10, 102, 194, 0.2);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(10, 102, 194, 0.4);
+}
+
+/* Idea Items */
+.idea-item {
+    user-select: none;
+    -webkit-user-drag: element;
+}
+
+.idea-item:active {
+    cursor: grabbing;
+    transform: scale(0.98);
+}
+
+/* Editor Slide-out */
+#postEditorPanel {
+    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+}
+
+/* Animations */
+@keyframes pulse-soft {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.4; }
+}
+
+.animate-pulse-soft {
+    animation: pulse-soft 2s infinite ease-in-out;
+}
+
+/* FullCalendar Customizations */
+#calendar {
+    min-height: 600px;
+}
+
+.fc {
+    height: 100% !important;
+}
+
+.fc-view-harness {
+    min-height: 500px;
+}
+
+.fc-header-toolbar {
+    margin-bottom: 1.5rem !important;
+}
+
+
+.fc-button-primary {
+    background-color: #0a66c2 !important;
+    border-color: #0a66c2 !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    text-transform: capitalize !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.fc-button-primary:hover {
+    background-color: #004182 !important;
+}
+
+.fc-button-active {
+    background-color: #004182 !important;
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+    border-color: rgba(226, 232, 240, 0.5) !important;
+}
+
+.dark .fc-theme-standard td, .dark .fc-theme-standard th {
+    border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.fc-event {
+    border: none !important;
+    background: transparent !important;
+}
+
+/* Hide scrollbar for mobile preview toggle */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+
+/* LinkedIn Preview Premium Styling */
+#linkedin-preview {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#preview-text {
+    font-family: 'Inter', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Fira Sans', Ubuntu, Oxygen, 'Oxygen Sans', Cantarell, 'Droid Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Lucida Grande', Helvetica, Arial, sans-serif;
+    color: rgba(0, 0, 0, 0.9);
+    line-height: 1.5;
+}
+
+.dark #preview-text {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+#preview-image {
+    transition: transform 0.5s ease;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.dark #preview-image {
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+#linkedin-preview:hover #preview-image {
+    transform: scale(1.02);
+}
+
+/* Glassmorphism for overlays */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-panel {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* LinkedIn Card Scrollbar */
+#linkedin-preview.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+#linkedin-preview.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+.dark #linkedin-preview.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+}

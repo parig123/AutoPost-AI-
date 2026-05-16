@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="h-[calc(100vh-4rem)] flex flex-col lg:flex-row gap-8 animate-fade-in">
+
+    <!-- Left Column: Input Panel -->
+    <div
+        class="w-full lg:w-1/2 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 overflow-y-auto custom-scrollbar">
+        <h2 class="text-2xl font-bold mb-6">Create New Post</h2>
+
+        <form id="generateForm" class="space-y-6">
+            <!-- Topic Input -->
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">What do you want to post
+                    about?</label>
+                <textarea id="topic" rows="3"
+                    class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all dark:text-white"
+                    placeholder="e.g. The future of LLMs and how they are impacting the job market..."></textarea>
+                <p class="text-xs text-slate-500">Supports bulk input (one topic per line)</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Tone Selection -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Tone</label>
+                    <select id="tone"
+                        class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none dark:text-white">
+                        <option value="Professional">Professional</option>
+                        <option value="Storytelling">Storytelling</option>
+                        <option value="Educational">Educational</option>
+                        <option value="Motivational">Motivational</option>
+                        <option value="Technical">Technical</option>
+                    </select>
+                </div>
+
+                <!-- Length Selection -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Length</label>
+                    <select id="length"
+                        class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none dark:text-white">
+                        <option value="Short">Short (50-100 words)</option>
+                        <option value="Medium" selected>Medium (150-250 words)</option>
+                        <option value="Long">Long (300-500 words)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Image Style -->
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Image Style</label>
+                <select id="imageStyle"
+                    class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none dark:text-white">
+                    <option value="Knowledge-rich" selected>Knowledge-rich</option>
+                    <option value="Minimalist">Minimalist</option>
+                    <option value="Data-driven">Data-driven</option>
+                    <option value="Quote-style">Quote-style</option>
+                    <option value="Realistic">Realistic</option>
+                    <option value="Illustrated">Illustrated</option>
+                </select>
+            </div>
+
+            <button type="submit"
+                class="w-full py-3 bg-primary text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/30 flex justify-center items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Content
+            </button>
+        </form>
+    </div>
+
+    <!-- Right Column: LinkedIn Preview -->
+    <div
+        class="w-full lg:w-1/2 flex flex-col bg-slate-100 dark:bg-slate-900 rounded-2xl p-4 lg:p-8 pb-20 overflow-y-auto custom-scrollbar items-center justify-start">
+        <!-- Mockup Container -->
+        <div class="w-full max-w-[500px] bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[70vh] text-sm dark:bg-[#1D2226] dark:border-[#38434F] text-[#000000e6] dark:text-[#ffffffe6] transition-colors relative custom-scrollbar"
+            id="linkedin-preview">
+
+            <!-- Empty state overlay -->
+            <div id="preview-empty-state"
+                class="absolute inset-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center text-center p-6">
+                <i class="fa-brands fa-linkedin text-5xl text-blue-600 mb-4 opacity-50"></i>
+                <p class="text-slate-600 dark:text-slate-300 font-medium">Your preview will appear here</p>
+                <p class="text-xs text-slate-400 mt-2">Fill out the form and click generate.</p>
+            </div>
+
+            <!-- LinkedIn Header -->
+            <div class="p-4 flex gap-3">
+                <div class="w-12 h-12 rounded-full bg-slate-200 overflow-hidden shrink-0">
+                    <img id="preview-avatar" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" alt="Avatar"
+                        class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-1">
+                        <span id="preview-name" class="font-bold text-[15px] hover:text-blue-600 cursor-pointer">You</span>
+                        <span class="text-slate-500">• 1st</span>
+                    </div>
+                    <div id="preview-headline" class="text-[12px] text-slate-500 leading-tight">AI & Machine Learning Enthusiast</div>
+                    <div class="text-[12px] text-slate-500 flex items-center gap-1 mt-[2px]">
+                        <span>Just now</span> • <i class="fa-solid fa-earth-americas text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post Text -->
+            <div class="px-4 pb-4 text-[14px] leading-relaxed whitespace-pre-wrap" id="preview-text">
+                This is a sample text. Generating realistic LinkedIn posts is an art.
+
+Here's why:
+- Hooks matter
+- Formatting is key
+- Emojis add flavor 🚀
+
+What are your thoughts? #AI #LinkedIn #Tech
+            </div>
+
+            <!-- Post Image -->
+            <div class="w-full bg-slate-100 relative" id="preview-image-wrap">
+                <img id="preview-image"
+                    src="https://image.pollinations.ai/prompt/Abstract%20minimalist%20technology%20background?width=1080&height=1350&nologo=true"
+                    alt="Post banner"
+                    class="w-full object-cover"
+                    onerror="this.parentElement.style.display='none'"
+                    onload="this.parentElement.style.display=''">
+            </div>
+
+            <!-- Post Footer (Reactions) -->
+            <div
+                class="px-4 py-2 border-b border-gray-100 dark:border-[#38434F] flex justify-between items-center text-[12px] text-slate-500">
+                <div class="flex items-center gap-1">
+                    <i class="fa-solid fa-thumbs-up text-blue-500 bg-blue-100 rounded-full p-1 text-[10px]"></i>
+                    <i class="fa-solid fa-heart text-red-500 bg-red-100 rounded-full p-1 text-[10px]"></i>
+                    <span class="ml-1">42</span>
+                </div>
+                <div>12 comments • 3 reposts</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="px-2 py-1 flex justify-between">
+                <button
+                    class="flex items-center gap-2 px-3 py-3 hover:bg-slate-100 dark:hover:bg-[#38434F] rounded font-semibold text-slate-600 dark:text-slate-300 w-1/4 justify-center transition-colors">
+                    <i class="fa-regular fa-thumbs-up text-[18px]"></i> <span>Like</span>
+                </button>
+                <button
+                    class="flex items-center gap-2 px-3 py-3 hover:bg-slate-100 dark:hover:bg-[#38434F] rounded font-semibold text-slate-600 dark:text-slate-300 w-1/4 justify-center transition-colors">
+                    <i class="fa-regular fa-comment text-[18px]"></i> <span>Comment</span>
+                </button>
+                <button
+                    class="flex items-center gap-2 px-3 py-3 hover:bg-slate-100 dark:hover:bg-[#38434F] rounded font-semibold text-slate-600 dark:text-slate-300 w-1/4 justify-center transition-colors">
+                    <i class="fa-solid fa-retweet text-[18px]"></i> <span>Repost</span>
+                </button>
+                <button
+                    class="flex items-center gap-2 px-3 py-3 hover:bg-slate-100 dark:hover:bg-[#38434F] rounded font-semibold text-slate-600 dark:text-slate-300 w-1/4 justify-center transition-colors">
+                    <i class="fa-regular fa-paper-plane text-[18px]"></i> <span>Send</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Bar (Appears after generation) -->
+        <div id="post-actions" class="mt-6 w-full max-w-[500px] flex gap-4 hidden">
+            <button
+                class="flex-1 py-3 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white font-semibold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all flex justify-center items-center gap-2">
+                <i class="fa-solid fa-clock"></i> Schedule
+            </button>
+            <button
+                class="flex-1 py-3 bg-[#0a66c2] text-white font-semibold rounded-xl hover:bg-[#004182] transition-all shadow-lg flex justify-center items-center gap-2">
+                <i class="fa-brands fa-linkedin"></i> Post Now
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/creator.js') }}"></script>
+{% endblock %}

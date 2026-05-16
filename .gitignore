@@ -1,0 +1,59 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# === Virtual Environment ===
+venv/
+env/
+.venv/
+ENV/
+
+# === Environment / Secrets ===
+.env
+.env.*
+!.env.example
+
+# === SQLite local database (we use Supabase in production) ===
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# === Logs ===
+*.log
+scheduler.log
+linkedin_debug.log
+debug_output.txt
+test_output.txt
+
+# === Vercel ===
+.vercel/
+
+# === Supabase local dev ===
+.supabase/
+
+# === Node (only md-to-pdf was used locally) ===
+node_modules/
+package-lock.json
+
+# === OS & Editor ===
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+
+# === Temp / Local-only scripts ===
+start.bat
+start_silent.vbs
+setup_autostart.bat
+remove_autostart.bat
+trends_cache.json

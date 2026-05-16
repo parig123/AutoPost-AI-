@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
+    <div class="w-full max-w-md">
+        <!-- Logo/Icon -->
+        <div class="mb-10 text-center">
+            <div
+                class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary shadow-xl shadow-blue-500/20 mb-6 rotate-3">
+                <i class="fa-brands fa-linkedin-in text-4xl text-white"></i>
+            </div>
+            <h1 class="text-4xl font-brand font-normal tracking-tight text-slate-900 dark:text-white mb-2">
+                AutoPost <span class="text-primary italic">AI</span>
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium">Professional Content Automation</p>
+        </div>
+
+        <!-- Login Card -->
+        <div
+            class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 p-8 text-center overflow-hidden relative">
+            <!-- Decorative Gradient -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-primary to-blue-900"></div>
+
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Access Account</h2>
+
+            <p class="text-slate-500 dark:text-slate-400 mb-8">
+                Sign in using your professional LinkedIn profile to manage your content schedule.
+            </p>
+
+            <button id="linkedinLoginBtn"
+                class="w-full group relative px-6 py-4 bg-[#0a66c2] text-white font-bold rounded-2xl hover:bg-[#004182] transition-all shadow-lg hover:shadow-blue-500/40 flex items-center justify-center gap-3 overflow-hidden">
+                <div
+                    class="absolute inset-0 w-full h-full bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                </div>
+                <i class="fa-brands fa-linkedin text-2xl"></i>
+                <span class="relative">Sign in with LinkedIn</span>
+            </button>
+
+            <div class="mt-8 pt-8 border-t border-slate-100 dark:border-slate-700/50">
+                <p class="text-xs text-slate-400 leading-relaxed italic">
+                    <i class="fa-solid fa-shield-halved mr-1"></i>
+                    Secure authentication via LinkedIn OAuth 2.0. We never store your password.
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="mt-8 text-center">
+            <a href="/" class="text-slate-500 hover:text-primary transition-colors text-sm font-medium">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Homepage
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('linkedinLoginBtn').addEventListener('click', async () => {
+        try {
+            const data = await API.request('/auth/linkedin', { method: 'GET' });
+            if (data.auth_url) {
+                window.location.href = data.auth_url;
+            }
+        } catch (error) {
+            console.error('Login initiation failed:', error);
+        }
+    });
+</script>
+{% endblock %}

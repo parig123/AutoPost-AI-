@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.faq-item { transition: all .2s ease; }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height .35s cubic-bezier(.4,0,.2,1), padding .2s ease; }
+.faq-item.open .faq-answer { max-height: 600px; padding-top: .75rem; }
+.faq-item.open .faq-chevron { transform: rotate(180deg); }
+.faq-chevron { transition: transform .25s ease; }
+.faq-category-pill {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .25rem .75rem; border-radius: 99px;
+    font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+.hero-glow {
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(10,102,194,.13) 0%, transparent 70%);
+}
+</style>
+
+<!-- Hero -->
+<div class="hero-glow rounded-3xl px-8 py-12 mb-10 text-center border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+    <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-circle-question text-primary text-2xl"></i>
+    </div>
+    <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">Frequently Asked Questions</h1>
+    <p class="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-sm">Everything you need to know about PostGenius AI — from getting started to scheduling and LinkedIn publishing.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Left: FAQ list -->
+    <div class="lg:col-span-2 flex flex-col gap-4">
+
+        <!-- Getting Started -->
+        <div>
+            <span class="faq-category-pill bg-blue-50 dark:bg-blue-900/30 text-primary">
+                <i class="fa-solid fa-rocket"></i> Getting Started
+            </span>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">How do I get started with PostGenius AI?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    Log in using your LinkedIn account via the Login page. Once authenticated, you'll be taken to the Dashboard where you can generate your first AI-powered post. Go to <strong>Create Post</strong>, enter a topic, pick a tone and length, and click Generate.
+                </div>
+            </div>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Do I need any API keys to use this?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    Yes — you need a <strong>GROQ_API_KEY</strong> (free at console.groq.com) and <strong>LinkedIn OAuth credentials</strong> (from the LinkedIn Developer Portal). Both go in the <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">.env</code> file. The app will still start without them, but AI generation and LinkedIn posting won't work until they're added.
+                </div>
+            </div>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">How do I run this on another computer?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Install Python 3.10+ and pip</li>
+                        <li>Copy the project folder to the new machine</li>
+                        <li>Create a virtual environment: <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">python -m venv venv</code></li>
+                        <li>Activate it and run: <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">pip install -r requirements.txt</code></li>
+                        <li>Copy your <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">.env</code> file (never commit it to Git)</li>
+                        <li>Run: <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">python app.py</code></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Generation -->
+        <div>
+            <span class="faq-category-pill bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> AI Generation
+            </span>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">What AI model powers the post generation?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    PostGenius AI uses <strong>Llama 3.3 70B</strong> via the Groq API — one of the fastest and most capable open models available. Images are generated via Pollinations.AI (free, no key required).
+                </div>
+            </div>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Why is my post generation slow or failing?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    This usually means your <strong>GROQ_API_KEY</strong> is missing, expired, or hitting the free rate limit (30 req/min). The app automatically retries up to 4 times on rate-limit errors. If it keeps failing, wait 60 seconds and try again, or upgrade your Groq plan.
+                </div>
+            </div>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Can I edit the AI-generated post before publishing?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    Yes! On the Create Post page, after generation the text is fully editable. You can tweak wording, add personal stories, or change the tone before saving or publishing.
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheduling & Publishing -->
+        <div>
+            <span class="faq-category-pill bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                <i class="fa-solid fa-calendar-check"></i> Scheduling & Publishing
+            </span>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Do I need to keep the browser open for scheduled posts?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    <strong>No.</strong> The scheduler runs as a background thread inside the server process. As long as <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">python app.py</code> is running on your machine, posts will publish automatically at the scheduled time — even with the browser closed.
+                </div>
+            </div>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">My post shows "Failed" — what do I do?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    Common reasons: <br>
+                    1. <strong>Expired LinkedIn token</strong> — go to Settings and reconnect your account.<br>
+                    2. <strong>Empty post content</strong> — ensure generated_text is not blank.<br>
+                    3. <strong>LinkedIn API limit</strong> — personal accounts can post ~150 times/day.<br>
+                    Check <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">linkedin_debug.log</code> in the project folder for the exact error message.
+                </div>
+            </div>
+
+            <div class="faq-item bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-sm mb-3 cursor-pointer" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Why does the site show "Connection Refused"?</span>
+                    <i class="faq-chevron fa-solid fa-chevron-down text-slate-400 flex-shrink-0 text-xs"></i>
+                </div>
+                <div class="faq-answer text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                    This means the Flask server is not running. Open a terminal, navigate to the project folder, activate the virtual environment, and run <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">python app.py</code>. The site will be available at <strong>http://localhost:5000</strong>.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right: Quick help sidebar -->
+    <div class="flex flex-col gap-4">
+
+        <!-- Run command card -->
+        <div class="bg-blue-50 dark:bg-slate-900/40 rounded-2xl p-5 border border-blue-100 dark:border-slate-700 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3">
+                <i class="fa-solid fa-terminal mr-1"></i> Run the app
+            </p>
+            <div class="flex flex-col gap-2 text-xs font-mono">
+                <div class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-emerald-600 dark:text-emerald-400 border border-blue-100/50 dark:border-slate-700">cd "neww prooject 2"</div>
+                <div class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-amber-600 dark:text-amber-400 border border-blue-100/50 dark:border-slate-700">.\venv\Scripts\activate</div>
+                <div class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-blue-600 dark:text-blue-400 border border-blue-100/50 dark:border-slate-700">python app.py</div>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mt-3">Then visit <span class="text-primary font-semibold">localhost:5000</span></p>
+        </div>
+
+        <!-- Useful links -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-4">Useful Links</p>
+            <div class="flex flex-col gap-2">
+                <a href="https://console.groq.com" target="_blank" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group text-sm text-slate-700 dark:text-slate-200">
+                    <div class="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                        <i class="fa-solid fa-bolt text-orange-500 text-xs"></i>
+                    </div>
+                    Groq Console (API Key)
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300 ml-auto"></i>
+                </a>
+                <a href="https://www.linkedin.com/developers/apps" target="_blank" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group text-sm text-slate-700 dark:text-slate-200">
+                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <i class="fa-brands fa-linkedin-in text-primary text-xs"></i>
+                    </div>
+                    LinkedIn Developer Portal
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300 ml-auto"></i>
+                </a>
+                <a href="/settings" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group text-sm text-slate-700 dark:text-slate-200">
+                    <div class="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                        <i class="fa-solid fa-gear text-purple-500 text-xs"></i>
+                    </div>
+                    App Settings
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-300 ml-auto"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Tip card -->
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Pro Tip</span>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300">Post on <strong>Tuesday–Thursday between 8–10 AM</strong> for the highest LinkedIn engagement. Use the Calendar to pre-schedule your whole week in one go!</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFaq(el) {
+    const isOpen = el.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-item.open').forEach(f => f.classList.remove('open'));
+    // Open clicked if it was closed
+    if (!isOpen) el.classList.add('open');
+}
+</script>
+{% endblock %}
