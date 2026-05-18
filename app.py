@@ -1,10 +1,11 @@
 import os
+import sys
 from flask import Flask, render_template, redirect, url_for, jsonify, request
 from flask_login import LoginManager, login_required
 from config import Config
 from models.database import db, User
 
-# Detect if we're running inside Vercel (serverless — APScheduler won't work there)
+# Detect if we're running inside Vercel (serverless)
 IS_VERCEL = os.environ.get('VERCEL') == '1'
 
 def create_app():
@@ -14,11 +15,11 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     
-    # Session configuration for stability during OAuth redirects
+    # Session configuration
     app.config.update(
         SESSION_COOKIE_NAME='autopost_session',
         SESSION_COOKIE_SAMESITE='Lax',
-        SESSION_COOKIE_SECURE=False, # Set to True in production with HTTPS
+        SESSION_COOKIE_SECURE=False,
         SESSION_COOKIE_HTTPONLY=True,
     )
     
@@ -38,7 +39,7 @@ def create_app():
             return jsonify({'error': 'Unauthorized'}), 401
         return redirect(url_for('login', next=request.path))
     
-    # Initialize scheduler locally only — on Vercel this is handled by Supabase Edge Functions
+    # Initialize scheduler locally only
     if not IS_VERCEL:
         if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
             try:
@@ -51,9 +52,9 @@ def create_app():
                 )
     else:
         import logging
-        logging.getLogger(__name__).info("[startup] Running on Vercel — APScheduler disabled. Using Supabase Edge Functions for scheduling.")
+        logging.getLogger(__name__).info("[startup] Running on Vercel — APScheduler disabled.")
 
-    # Register blueprints (to be imported from routes)
+    # Register blueprints
     from routes.auth import auth_bp
     from routes.posts import posts_bp
     from routes.schedule import schedule_bp
@@ -92,7 +93,6 @@ def create_app():
 
     @app.route('/queue')
     def queue():
-        # Review hub removed — redirect to FAQ
         return redirect(url_for('faq'))
 
     @app.route('/faq')
@@ -104,13 +104,9 @@ def create_app():
     def settings():
         return render_template('settings.html')
 
-    # ----------------------------------------------------------------
-    # Cron Endpoint — called by Supabase Edge Function every N minutes
-    # Protected by a shared CRON_SECRET so no one else can trigger it.
-    # ----------------------------------------------------------------
+    # Cron Endpoint
     @app.route('/api/cron/publish', methods=['POST'])
     def cron_publish():
-        # Verify the secret header sent by Supabase
         auth_header = request.headers.get('X-Cron-Auth', '')
         if Config.CRON_SECRET and auth_header != Config.CRON_SECRET:
             return jsonify({'error': 'Unauthorized'}), 401
@@ -131,36 +127,17 @@ def create_app():
     return app
 
 
-# ----------------------------------------------------------------
-# Module-level app object — required by Vercel's WSGI entry point.
-# Vercel looks for `app` at the top level of the file specified in
-# vercel.json's `src` field.
-# ----------------------------------------------------------------
+# Create app instance for Vercel
 app = create_app()
 
+# Vercel WSGI entry point
+application = app
+
+# Local development only
 if __name__ == '__main__':
-    import sys
-    # Fix Windows console encoding so the startup banner prints without crashing
-    if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
-        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-    try:
-        app = create_app()
-    except Exception as startup_err:
-        print(f"\n[FATAL] Application failed to start: {startup_err}")
-        print("Check your .env file and make sure all required packages are installed.\n")
-        sys.exit(1)
-
     port = int(os.environ.get('PORT', 5000))
-
-    # Print a clear startup banner so the link is always visible in the terminal
     print("\n" + "="*50)
     print("  [OK] AutoPost AI is running!")
     print(f"  >>   Open in browser: http://localhost:{port}")
     print("="*50 + "\n")
-
-    # host='0.0.0.0' makes the server reachable on any platform / network interface.
     app.run(host='0.0.0.0', port=port, debug=True, use_reloader=True)
-
-
-# For Vercel serverless deployment
-application = app
