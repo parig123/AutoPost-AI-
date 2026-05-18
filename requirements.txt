@@ -9,3 +9,7 @@ marshmallow==3.20.1
 psycopg2-binary==2.9.9
 # Production: WSGI server for Vercel
 gunicorn==21.2.0
+Werkzeug==3.0.1
+
+
+

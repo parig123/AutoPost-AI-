@@ -160,3 +160,7 @@ if __name__ == '__main__':
 
     # host='0.0.0.0' makes the server reachable on any platform / network interface.
     app.run(host='0.0.0.0', port=port, debug=True, use_reloader=True)
+
+
+# For Vercel serverless deployment
+application = app
