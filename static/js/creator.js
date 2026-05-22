@@ -136,40 +136,95 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle Schedule
+    // Handle Schedule — use a native datetime-local picker (no manual parsing)
     const scheduleBtn = actionButtons.querySelector('button:first-child');
-    scheduleBtn.addEventListener('click', async () => {
+    scheduleBtn.addEventListener('click', () => {
         if (!currentPostData) return;
-        
-        // Better UX: Ask for date and time separately to make it clear
-        const dateInput = prompt("Enter Date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-        if (!dateInput) return;
-        
-        const timeInput = prompt("Enter Time (e.g., 04:30 PM):", "09:00 AM");
-        if (!timeInput) return;
 
-        try {
-            // Convert 12h to 24h for the Date object
-            const [time, modifier] = timeInput.split(' ');
-            let [hours, minutes] = time.split(':');
-            if (hours === '12') hours = '00';
-            if (modifier.toUpperCase() === 'PM') hours = parseInt(hours, 10) + 12;
-            
-            const scheduledDate = new Date(`${dateInput}T${hours}:${minutes}:00`);
-            const scheduledTimeUTC = scheduledDate.toISOString();
-            
-            await API.createPost({
-                ...currentPostData, // This contains the FULL generated_text
-                status: 'Scheduled',
-                scheduled_time: scheduledTimeUTC
+        // Build modal if it doesn't exist yet
+        let modal = document.getElementById('scheduleModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'scheduleModal';
+            modal.style.cssText = `
+                position:fixed;inset:0;background:rgba(0,0,0,0.55);
+                display:flex;align-items:center;justify-content:center;z-index:9999;
+            `;
+            modal.innerHTML = `
+                <div style="background:#fff;border-radius:16px;padding:32px 28px;width:340px;
+                            box-shadow:0 20px 60px rgba(0,0,0,0.25);font-family:inherit;">
+                    <h3 style="margin:0 0 6px;font-size:18px;color:#1a1a2e;">📅 Schedule Post</h3>
+                    <p style="margin:0 0 20px;font-size:13px;color:#666;">Pick a date and time to publish.</p>
+                    <label style="font-size:13px;font-weight:600;color:#444;display:block;margin-bottom:6px;">Date &amp; Time</label>
+                    <input type="datetime-local" id="scheduleDatetimePicker"
+                        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;
+                               font-size:14px;color:#333;outline:none;box-sizing:border-box;margin-bottom:20px;" />
+                    <div style="display:flex;gap:10px;">
+                        <button id="scheduleConfirmBtn"
+                            style="flex:1;padding:11px;background:#0a66c2;color:#fff;border:none;
+                                   border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                            Schedule
+                        </button>
+                        <button id="scheduleCancelBtn"
+                            style="flex:1;padding:11px;background:#f0f0f0;color:#333;border:none;
+                                   border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('scheduleCancelBtn').addEventListener('click', () => {
+                modal.style.display = 'none';
             });
-
-            showToast('Post scheduled successfully with full content!');
-            window.location.href = '/calendar';
-
-        } catch (error) {
-            console.error('Scheduling Error:', error);
-            showToast('Invalid format. Use YYYY-MM-DD and HH:MM AM/PM', 'error');
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
         }
+
+        // Pre-fill with current time + 1 hour
+        const now = new Date(Date.now() + 60 * 60 * 1000);
+        const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+            .toISOString().slice(0, 16);
+        document.getElementById('scheduleDatetimePicker').value = localISO;
+        modal.style.display = 'flex';
+
+        // Confirm handler (replace each time to avoid duplicate listeners)
+        const confirmBtn = document.getElementById('scheduleConfirmBtn');
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+        newConfirmBtn.addEventListener('click', async () => {
+            const picker = document.getElementById('scheduleDatetimePicker');
+            if (!picker.value) {
+                showToast('Please pick a date and time', 'error');
+                return;
+            }
+
+            const scheduledDate = new Date(picker.value);
+            if (isNaN(scheduledDate.getTime())) {
+                showToast('Invalid date selected', 'error');
+                return;
+            }
+
+            modal.style.display = 'none';
+            newConfirmBtn.disabled = true;
+
+            try {
+                await API.createPost({
+                    ...currentPostData,
+                    status: 'Scheduled',
+                    scheduled_time: scheduledDate.toISOString()
+                });
+                showToast('Post scheduled successfully!');
+                window.location.href = '/calendar';
+            } catch (error) {
+                console.error('Scheduling Error:', error);
+                showToast(error.message || 'Failed to schedule post', 'error');
+            } finally {
+                newConfirmBtn.disabled = false;
+            }
+        });
     });
 });

@@ -35,8 +35,6 @@ linkedin_debug.log
 debug_output.txt
 test_output.txt
 
-# === Vercel ===
-.vercel/
 
 # === Supabase local dev ===
 .supabase/
@@ -57,3 +55,6 @@ start_silent.vbs
 setup_autostart.bat
 remove_autostart.bat
 trends_cache.json
+
+# === AI Generated Images ===
+static/generated/

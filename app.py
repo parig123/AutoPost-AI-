@@ -2,17 +2,18 @@ import os
 import sys
 from flask import Flask, render_template, redirect, url_for, jsonify, request
 from flask_login import LoginManager, login_required
-from config import Config
-from models.database import db, User
 
-# Detect if we're running inside Vercel (serverless)
-IS_VERCEL = os.environ.get('VERCEL') == '1'
+
 
 def create_app():
     app = Flask(__name__)
+    
+    # Load config
+    from config import Config
     app.config.from_object(Config)
-
+    
     # Initialize extensions
+    from models.database import db, User
     db.init_app(app)
     
     # Session configuration
@@ -39,20 +40,16 @@ def create_app():
             return jsonify({'error': 'Unauthorized'}), 401
         return redirect(url_for('login', next=request.path))
     
-    # Initialize scheduler locally only
-    if not IS_VERCEL:
-        if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-            try:
-                from services.scheduler import init_scheduler
-                init_scheduler(app)
-            except Exception as sched_err:
-                import logging
-                logging.getLogger(__name__).warning(
-                    f"[startup] Scheduler could not start (non-fatal): {sched_err}"
-                )
-    else:
-        import logging
-        logging.getLogger(__name__).info("[startup] Running on Vercel — APScheduler disabled.")
+    # Initialize scheduler
+    if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        try:
+            from services.scheduler import init_scheduler
+            init_scheduler(app)
+        except Exception as sched_err:
+            import logging
+            logging.getLogger(__name__).warning(
+                f"[startup] Scheduler could not start (non-fatal): {sched_err}"
+            )
 
     # Register blueprints
     from routes.auth import auth_bp
@@ -107,6 +104,7 @@ def create_app():
     # Cron Endpoint
     @app.route('/api/cron/publish', methods=['POST'])
     def cron_publish():
+        from config import Config
         auth_header = request.headers.get('X-Cron-Auth', '')
         if Config.CRON_SECRET and auth_header != Config.CRON_SECRET:
             return jsonify({'error': 'Unauthorized'}), 401
@@ -120,18 +118,14 @@ def create_app():
             logging.getLogger(__name__).error(f"[cron] Error: {e}")
             return jsonify({'error': str(e)}), 500
 
-    # Create tables
+    # Create tables ONLY when app context is available
     with app.app_context():
         db.create_all()
 
     return app
 
 
-# Create app instance for Vercel
 app = create_app()
-
-# Vercel WSGI entry point
-application = app
 
 # Local development only
 if __name__ == '__main__':

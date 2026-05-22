@@ -69,7 +69,7 @@ class LinkedInAPI:
             'Authorization': f'Bearer {access_token}',
             'Content-Type': 'application/json',
             'X-Restli-Protocol-Version': '2.0.0',
-            'LinkedIn-Version': '202505',
+            'LinkedIn-Version': '202506',
             'X-Restli-Method': 'create'
         }
 
@@ -87,9 +87,6 @@ class LinkedInAPI:
             "isReshareDisabledByAuthor": False
         }
 
-        # Specialized handling for Organizations
-        if is_org:
-            payload["isCommentaryOptional"] = False
 
         # Add image content if provided
         if image_url:
@@ -105,18 +102,11 @@ class LinkedInAPI:
                     }
                 }
             except Exception as e:
-                # Fallback to article link if native upload fails
+                # Image upload failed — post text-only so full text is visible
                 with open('linkedin_debug.log', 'a', encoding='utf-8') as f:
                     f.write(f"--- IMAGE UPLOAD FAILED ({datetime.now().isoformat()}) ---\n")
-                    f.write(f"Error: {str(e)}\n falling back to article link.\n")
-                
-                payload["content"] = {
-                    "article": {
-                        "source": image_url,
-                        "title": "Shared via PostGenius AI",
-                        "description": "Information and insights shared directly from the dashboard."
-                    }
-                }
+                    f.write(f"Error: {str(e)}\n posting text-only as fallback.\n")
+                # Do NOT add content key — text-only posts show full text on LinkedIn
 
         try:
             with open('linkedin_debug.log', 'a', encoding='utf-8') as f:
@@ -160,7 +150,7 @@ class LinkedInAPI:
         headers = {
             'Authorization': f'Bearer {access_token}',
             'Content-Type': 'application/json',
-            'LinkedIn-Version': '202505',
+            'LinkedIn-Version': '202506',
             'X-Restli-Protocol-Version': '2.0.0'
         }
         

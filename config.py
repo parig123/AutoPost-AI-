@@ -5,7 +5,7 @@ load_dotenv()
 
 def _fix_db_url(url: str | None) -> str | None:
     """Supabase gives a 'postgres://' URI but SQLAlchemy needs 'postgresql://'.
-    This one-line fix prevents a 'could not translate host' error on Vercel."""
+    This fix ensures the URL prefix is correct."""
     if url and url.startswith("postgres://"):
         return url.replace("postgres://", "postgresql://", 1)
     return url
