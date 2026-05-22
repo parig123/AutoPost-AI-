@@ -12,16 +12,20 @@ def create_app():
     from config import Config
     app.config.from_object(Config)
     
+    # CRITICAL: Tell Flask it's behind a proxy (fixes HTTPS/session issues on Render)
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+    
     # Initialize extensions
     from models.database import db, User
     db.init_app(app)
     
-    # Session configuration
+    # Session configuration for production
     app.config.update(
         SESSION_COOKIE_NAME='autopost_session',
         SESSION_COOKIE_SAMESITE='Lax',
-        SESSION_COOKIE_SECURE=False,
-        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SECURE=True,      # Only send cookies over HTTPS
+        SESSION_COOKIE_HTTPONLY=True,    # Prevent JavaScript access
     )
     
     # Initialize Flask-Login
